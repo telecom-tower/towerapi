@@ -1,0 +1,133 @@
+// Copyright 2018 Jacques Supcik / HEIA-FR
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package heiafr.telecomtower.v1;
+option go_package = "telecomtower";
+
+// Telecom Tower API
+//
+// The telecom tower API can be used to send drawing commands to the display
+// of the telecom tower.
+
+// TowerDisplay is the main service of the API. It contains the Draw method.
+service TowerDisplay {
+  // Draw receives a stream of DrawRequests. When the stream closes, the
+  // display is rendered (refreshed) and the caller receives the result in
+  // the DrawResponse.
+  rpc Draw(stream DrawRequest) returns (DrawResponse);
+}
+
+// Color describes a color as a RGBA tuple.
+message Color {
+  uint32 red = 1;
+  uint32 green = 2;
+  uint32 blue = 3;
+  uint32 alpha = 4;
+
+}
+
+// Point describes a location (x,y) on the bitmap
+message Point {
+  int32 column = 1;
+  int32 row = 2;
+}
+
+// Pixel is the basic element of a picture. It represents the color at a
+// given point.
+message Pixel {
+  Point point = 1;
+  Color color = 2;
+}
+
+// DrawRequest is a basic drawing request. It can just set the color of a
+// point, or do more complex operation such as writing text with a given 
+// font in a given color at a given position.
+message DrawRequest {
+  oneof type {
+    Fill fill = 1;
+    SetPixels setPixels = 2;
+    DrawLine drawLine = 3;
+    DrawRectangle drawRectangle = 4;
+    DrawBitmap drawBitmap = 5;
+    WriteText writeText = 6;
+    HScroll hScroll = 7;
+    VScroll vScroll = 8;
+  }
+}
+
+// Draw response is the return value of a rendering. It is empty if everything
+// was OK, otherwise it is the description of the error.
+message DrawResponse {
+    string message = 1;
+}
+
+// Drawing request primitives
+
+// Fill fills the entire bitmap with a given color.
+message Fill {
+    Color color = 1;
+}
+
+// SetPixels sets individual pixels of the bitmap.
+message SetPixels {
+  repeated Pixel pixels = 1;
+}
+
+// DrawLine draws a line between point0 and point1 in a given color.
+message DrawLine {
+  Point point0 = 1;
+  Point point1 = 2;
+  Color color = 3;
+}
+
+// DrawLine draws a rectangle defined by point0 and point1 in a given color.
+message DrawRectangle {
+  Point point0 = 1;
+  Point point1 = 2;
+  Color color = 3;
+}
+
+// DrawBitbap fills a rectangular region with the given pixel colors. The
+// list of colors is given in Row-major order
+// (https://en.wikipedia.org/wiki/Row-_and_column-major_order)
+message DrawBitmap {
+  Point position = 1;
+  uint32 width = 2;
+  uint32 height = 3;
+  repeated Color colors = 4;
+}
+
+// WriteText writes a string at a given position, with a given font and
+// a given color. If the text is clipped inside the boundaries of the
+// bitmap.
+message WriteText {
+  Point position = 1;
+  string font = 2;
+  Color color = 3;
+  string text = 4;
+}
+
+// HScroll does a horizontal translation of dx points
+message HScroll {
+  int32 dx = 1;
+  Color bgcolor = 2;
+}
+
+// VScroll does a vertical translation of dy points
+message VScroll {
+  int32 dy = 1;
+  Color bgcolor = 2;
+}
