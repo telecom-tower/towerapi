@@ -14,7 +14,7 @@
 
 syntax = "proto3";
 
-package heiafr.telecomtower.v1;
+package telecomtower.v1;
 option go_package = "telecomtower";
 
 // Telecom Tower API
@@ -57,14 +57,19 @@ message Pixel {
 // font in a given color at a given position.
 message DrawRequest {
   oneof type {
+    // type 1 - 15 are for frequent requests
     Fill fill = 1;
     SetPixels setPixels = 2;
-    DrawLine drawLine = 3;
-    DrawRectangle drawRectangle = 4;
-    DrawBitmap drawBitmap = 5;
-    WriteText writeText = 6;
-    HScroll hScroll = 7;
-    VScroll vScroll = 8;
+    DrawRectangle drawRectangle = 3;
+    DrawBitmap drawBitmap = 4;
+    WriteText writeText = 5;
+    HScroll hScroll = 6;
+    VScroll vScroll = 7;
+    SetLayerAlpha setLayerAlpha = 8;
+    Roll roll = 9;
+    Effect effect = 10;
+    Animate animate = 11;
+    // type 16 and up are for less frequent requests
   }
 }
 
@@ -79,25 +84,23 @@ message DrawResponse {
 // Fill fills the entire bitmap with a given color.
 message Fill {
     Color color = 1;
+    int32 layer = 2;
 }
 
 // SetPixels sets individual pixels of the bitmap.
 message SetPixels {
   repeated Pixel pixels = 1;
-}
-
-// DrawLine draws a line between point0 and point1 in a given color.
-message DrawLine {
-  Point point0 = 1;
-  Point point1 = 2;
-  Color color = 3;
+  int32 layer = 2;
 }
 
 // DrawLine draws a rectangle defined by point0 and point1 in a given color.
+// If the column or the row of both points is the same, then a line is
+// drawn instead of a rectangle.
 message DrawRectangle {
   Point point0 = 1;
   Point point1 = 2;
   Color color = 3;
+  int32 layer = 4;
 }
 
 // DrawBitbap fills a rectangular region with the given pixel colors. The
@@ -108,6 +111,7 @@ message DrawBitmap {
   uint32 width = 2;
   uint32 height = 3;
   repeated Color colors = 4;
+  int32 layer = 5;
 }
 
 // WriteText writes a string at a given position, with a given font and
@@ -118,16 +122,63 @@ message WriteText {
   string font = 2;
   Color color = 3;
   string text = 4;
+  int32 layer = 5;
 }
 
 // HScroll does a horizontal translation of dx points
 message HScroll {
   int32 dx = 1;
   Color bgcolor = 2;
+  // if the layers is empty, scroll all layers
+  repeated int32 layers = 3;
 }
 
 // VScroll does a vertical translation of dy points
 message VScroll {
   int32 dy = 1;
   Color bgcolor = 2;
+  // if the layers is empty, scroll all layers
+  repeated int32 layers = 3;
+}
+
+// Roll starts an horizontal automatic rotation
+message Roll {
+  bool reverse = 1;
+  int32 speed = 2;
+  // if the layers is empty, roll all layers
+  repeated int32 layers = 3;
+}
+
+// Effect makes a repeated effect on the display
+message Effect {
+  enum Type {
+    BLINK = 0;
+    FLASH = 1;
+    INVERSE = 2;
+  }
+  Type type = 1;
+  int32 speed = 2;
+  // if the layers is empty, do the effect on all layers
+  repeated int32 layers = 3;
+  // if iterations is zero or negative, repeat until next
+  // request
+  int32 iterations = 4;
+}
+
+// Animate between the layer sets
+message Animate {
+  message LayerSet {
+    repeated int32 layers = 1;
+  }
+  repeated LayerSet layerSets = 1;
+  int32 speed = 2;
+  // if iterations is zero or negative, repeat until next
+  // request
+  int32 iterations = 3;
+}
+
+// SetLayerAlpha defines the global transparency of the layer.
+message SetLayerAlpha {
+  int32 layer = 1;
+  int32 alpha = 2;
 }
