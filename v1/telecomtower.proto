@@ -30,7 +30,12 @@ service TowerDisplay {
   rpc Draw(stream DrawRequest) returns (DrawResponse);
 }
 
-// Color describes a color as a RGBA tuple.
+enum PaintMode {
+  PAINT = 0;
+  OVER = 1;
+}
+
+// Color describes a color as a 16bit RGBA tuple.
 message Color {
   uint32 red = 1;
   uint32 green = 2;
@@ -41,8 +46,8 @@ message Color {
 
 // Point describes a location (x,y) on the bitmap
 message Point {
-  int32 column = 1;
-  int32 row = 2;
+  int32 x = 1;
+  int32 y = 2;
 }
 
 // Pixel is the basic element of a picture. It represents the color at a
@@ -59,16 +64,17 @@ message DrawRequest {
   oneof type {
     // type 1 - 15 are for frequent requests
     Fill fill = 1;
-    SetPixels setPixels = 2;
-    DrawRectangle drawRectangle = 3;
-    DrawBitmap drawBitmap = 4;
-    WriteText writeText = 5;
-    HScroll hScroll = 6;
-    VScroll vScroll = 7;
-    SetLayerAlpha setLayerAlpha = 8;
-    Roll roll = 9;
-    Effect effect = 10;
-    Animate animate = 11;
+    Clear clear = 2;
+    SetPixels setPixels = 3;
+    DrawRectangle drawRectangle = 4;
+    DrawBitmap drawBitmap = 5;
+    WriteText writeText = 6;
+    HScroll hScroll = 7;
+    VScroll vScroll = 8;
+    SetLayerAlpha setLayerAlpha = 9;
+    Roll roll = 10;
+    Effect effect = 11;
+    Animate animate = 12;
     // type 16 and up are for less frequent requests
   }
 }
@@ -85,22 +91,30 @@ message DrawResponse {
 message Fill {
     Color color = 1;
     int32 layer = 2;
+    PaintMode paintMode = 3;
 }
+
+// Clear clears a set of layers.
+message Clear {
+  repeated int32 layer = 1;
+}
+
 
 // SetPixels sets individual pixels of the bitmap.
 message SetPixels {
   repeated Pixel pixels = 1;
   int32 layer = 2;
+  PaintMode paintMode = 3;
 }
 
 // DrawLine draws a rectangle defined by point0 and point1 in a given color.
-// If the column or the row of both points is the same, then a line is
-// drawn instead of a rectangle.
+// The rectangle can be "degraded" to a line.
 message DrawRectangle {
-  Point point0 = 1;
-  Point point1 = 2;
+  Point min = 1;
+  Point max = 2;
   Color color = 3;
   int32 layer = 4;
+  PaintMode paintMode = 5;
 }
 
 // DrawBitbap fills a rectangular region with the given pixel colors. The
@@ -112,17 +126,19 @@ message DrawBitmap {
   uint32 height = 3;
   repeated Color colors = 4;
   int32 layer = 5;
+  PaintMode paintMode = 6;
 }
 
 // WriteText writes a string at a given position, with a given font and
 // a given color. If the text is clipped inside the boundaries of the
 // bitmap.
 message WriteText {
-  Point position = 1;
+  int32 x = 1;
   string font = 2;
   Color color = 3;
   string text = 4;
   int32 layer = 5;
+  PaintMode paintMode = 6;
 }
 
 // HScroll does a horizontal translation of dx points
