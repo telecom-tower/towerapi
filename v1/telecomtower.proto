@@ -69,12 +69,9 @@ message DrawRequest {
     DrawRectangle drawRectangle = 4;
     DrawBitmap drawBitmap = 5;
     WriteText writeText = 6;
-    HScroll hScroll = 7;
-    VScroll vScroll = 8;
-    SetLayerAlpha setLayerAlpha = 9;
-    Roll roll = 10;
-    Effect effect = 11;
-    Animate animate = 12;
+    SetLayerOrigin setLayerOrigin = 7;
+    SetLayerAlpha setLayerAlpha = 8;
+    AutoRoll autoRoll = 9;
     // type 16 and up are for less frequent requests
   }
 }
@@ -98,7 +95,6 @@ message Fill {
 message Clear {
   repeated int32 layer = 1;
 }
-
 
 // SetPixels sets individual pixels of the bitmap.
 message SetPixels {
@@ -141,56 +137,10 @@ message WriteText {
   PaintMode paintMode = 6;
 }
 
-// HScroll does a horizontal translation of dx points
-message HScroll {
-  int32 dx = 1;
-  Color bgcolor = 2;
-  // if the layers is empty, scroll all layers
-  repeated int32 layers = 3;
-}
-
-// VScroll does a vertical translation of dy points
-message VScroll {
-  int32 dy = 1;
-  Color bgcolor = 2;
-  // if the layers is empty, scroll all layers
-  repeated int32 layers = 3;
-}
-
-// Roll starts an horizontal automatic rotation
-message Roll {
-  bool reverse = 1;
-  int32 speed = 2;
-  // if the layers is empty, roll all layers
-  repeated int32 layers = 3;
-}
-
-// Effect makes a repeated effect on the display
-message Effect {
-  enum Type {
-    BLINK = 0;
-    FLASH = 1;
-    INVERSE = 2;
-  }
-  Type type = 1;
-  int32 speed = 2;
-  // if the layers is empty, do the effect on all layers
-  repeated int32 layers = 3;
-  // if iterations is zero or negative, repeat until next
-  // request
-  int32 iterations = 4;
-}
-
-// Animate between the layer sets
-message Animate {
-  message LayerSet {
-    repeated int32 layers = 1;
-  }
-  repeated LayerSet layerSets = 1;
-  int32 speed = 2;
-  // if iterations is zero or negative, repeat until next
-  // request
-  int32 iterations = 3;
+// SetLayerOrigin defines the origin of the frame
+message SetLayerOrigin {
+  int32 layer = 1;
+  Point position = 2;
 }
 
 // SetLayerAlpha defines the global transparency of the layer.
@@ -198,3 +148,15 @@ message SetLayerAlpha {
   int32 layer = 1;
   int32 alpha = 2;
 }
+
+// Roll starts an horizontal automatic rotation
+message AutoRoll {
+  int32 layer = 1;
+  enum Mode {
+    CONTINUE = 0;
+    START = 1;
+    STOP = 2;
+  }
+  Mode mode = 2;
+}
+
