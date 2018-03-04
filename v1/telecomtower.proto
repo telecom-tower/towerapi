@@ -153,10 +153,13 @@ message SetLayerAlpha {
 message AutoRoll {
   int32 layer = 1;
   enum Mode {
-    CONTINUE = 0;
-    START = 1;
-    STOP = 2;
+    STOP     = 0; // No roll or stop rolling if it was rolling
+    START    = 1; // first message (with blank introduction)
+    NEXT     = 2; // next message (with the end of the last message as introduction)
+    CONTINUE = 3; // continue rolling this layer
   }
   Mode mode = 2;
+  int32 entry = 3;
+  int32 separator = 4;
 }
 
