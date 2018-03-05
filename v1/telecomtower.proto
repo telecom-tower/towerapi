@@ -63,15 +63,14 @@ message Pixel {
 message DrawRequest {
   oneof type {
     // type 1 - 15 are for frequent requests
-    Fill fill = 1;
-    Clear clear = 2;
-    SetPixels setPixels = 3;
-    DrawRectangle drawRectangle = 4;
-    DrawBitmap drawBitmap = 5;
-    WriteText writeText = 6;
-    SetLayerOrigin setLayerOrigin = 7;
-    SetLayerAlpha setLayerAlpha = 8;
-    AutoRoll autoRoll = 9;
+    Clear clear = 1;
+    SetPixels setPixels = 2;
+    DrawRectangle drawRectangle = 3;
+    DrawBitmap drawBitmap = 4;
+    WriteText writeText = 5;
+    SetLayerOrigin setLayerOrigin = 6;
+    SetLayerAlpha setLayerAlpha = 7;
+    AutoRoll autoRoll = 8;
     // type 16 and up are for less frequent requests
   }
 }
@@ -83,13 +82,6 @@ message DrawResponse {
 }
 
 // Drawing request primitives
-
-// Fill fills the entire bitmap with a given color.
-message Fill {
-    Color color = 1;
-    int32 layer = 2;
-    PaintMode paintMode = 3;
-}
 
 // Clear clears a set of layers.
 message Clear {
