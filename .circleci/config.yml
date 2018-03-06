@@ -3,13 +3,15 @@ jobs:
   build:
     docker:
       - image: circleci/golang:1.9
-      
+
     working_directory: /go/src/github.com/telecom-tower/towerapi
     steps:
       - checkout
       - run:
           command: wget -q -nc https://github.com/google/protobuf/releases/download/v3.5.1/protoc-3.5.1-linux-x86_64.zip
           working_directory: /tmp
+          environment:
+            - PROTO_VERSION: "3.5.1"
       - run:
           command: sudo unzip /tmp/protoc-3.5.1-linux-x86_64.zip
           working_directory: /usr/local
